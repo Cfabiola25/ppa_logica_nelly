@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <form id="solicitudForm" style="width: 600px;">
+        <h1>Crear PDF</h1>
+        <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
+        </div>
+        <div class="form-group">
+            <label for="documento">Documento de Identidad</label>
+            <input type="text" id="documento" name="documento" placeholder="Documento de Identidad" required>
+        </div>
+        <div class="form-group">
+            <label for="tipo_permiso">Tipo de Permiso</label>
+            <select id="tipo_permiso" name="tipo_permiso" required>
+                <option value="" disabled selected>Seleccione</option>
+                <option value="remunerado">Remunerado</option>
+                <option value="no_remunerado">No Remunerado</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="motivo">Motivo</label>
+            <select id="motivo" name="motivo" required>
+                <option value="" disabled selected>Seleccione</option>
+                <option value="Familiar">Familiar</option>
+                <option value="Salud">Salud</option>
+                <option value="Estudios">Estudios</option>
+                <option value="Otro">Otro (especificar)</option>
+            </select>
+        </div>
+        <div class="form-group hidden" id="descripcion-group">
+            <label for="descripcion">Especifique el motivo</label>
+            <textarea id="descripcion" name="descripcion" placeholder="Describa el motivo aquí"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="fecha_solicitud">Fecha de Solicitud</label>
+            <input type="date" id="fecha_solicitud" name="fecha_solicitud" required>
+        </div>
+        <div class="form-group">
+            <label for="fecha_inicio">Fecha de Inicio</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+        </div>
+        <div class="form-group">
+            <label for="fecha_fin">Fecha de Fin</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" required>
+        </div>
+        <div class="form-group">
+            <label for="duracion">Duración</label>
+            <input type="number" id="duracion" name="duracion" placeholder="Duración en número" required>
+        </div>
+        <div class="form-group">
+            <label for="unidad_duracion">Unidad de Duración</label>
+            <select id="unidad_duracion" name="unidad_duracion" required>
+                <option value="" disabled selected>Seleccione</option>
+                <option value="horas">Horas</option>
+                <option value="días">Días</option>
+                <option value="semanas">Semanas</option>
+            </select>
+        </div>
+        <button type="button" onclick="generarPDF()">Generar mi PDF</button>
+    </form>
+
+    <script type="text/javascript">
+        document.getElementById('motivo').addEventListener('change', function() {
+            const descripcionGroup = document.getElementById('descripcion-group');
+            const descripcion = document.getElementById('descripcion');
+
+            if (this.value === 'Otro') {
+                descripcionGroup.classList.remove('hidden');
+                descripcion.setAttribute('required', 'true');
+            } else {
+                descripcionGroup.classList.add('hidden');
+                descripcion.removeAttribute('required');
+            }
+        });
+
+        function generarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Obtener los valores de los campos de entrada
+            const nombre = document.getElementById('nombre').value;
+            const documento = document.getElementById('documento').value;
+            const tipoPermiso = document.getElementById('tipo_permiso').value;
+            const motivo = document.getElementById('motivo').value;
+            const descripcion = document.getElementById('descripcion').value || 'N/A';
+            const fechaSolicitud = document.getElementById('fecha_solicitud').value;
+            const fechaInicio = document.getElementById('fecha_inicio').value;
+            const fechaFin = document.getElementById('fecha_fin').value;
+            const duracion = document.getElementById('duracion').value;
+            const unidadDuracion = document.getElementById('unidad_duracion').value;
+
+            // Agregar contenido al PDF con estilo
+            doc.setFontSize(20);
+            doc.setTextColor(0, 0, 139);
+            doc.text('Detalles de la Solicitud', 105, 20, null, null, 'center');
+
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Documento de Identidad: ${documento}`, 20, 40);
+            doc.text(`Nombre: ${nombre}`, 20, 50);
+            doc.text(`Tipo de Permiso: ${tipoPermiso}`, 20, 60);
+            doc.text(`Motivo: ${motivo}`, 20, 70);
+            if (motivo === 'Otro') doc.text(`Descripción: ${descripcion}`, 20, 80);
+            doc.text(`Fecha de Solicitud: ${fechaSolicitud}`, 20, 90);
+            doc.text(`Fecha de Inicio: ${fechaInicio}`, 20, 100);
+            doc.text(`Fecha de Fin: ${fechaFin}`, 20, 110);
+            doc.text(`Duración: ${duracion} ${unidadDuracion}`, 20, 120);
+
+            doc.save('detalles_solicitud.pdf');
+        }
+    </script>
+</body>
+</html>
